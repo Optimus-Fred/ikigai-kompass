@@ -957,19 +957,23 @@ function wrapText(doc, text, x, y, maxW, lineH) {
 }
 
 function downloadPDF() {
-  if (!analyseResult) return;
+  if (!analyseResult) {
+    alert('Bitte zuerst die Analyse durchführen.');
+    return;
+  }
   try {
     const { jsPDF } = window.jspdf;
+    if (!jsPDF) { alert('PDF-Bibliothek nicht geladen. Bitte Seite neu laden.'); return; }
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const W = 210, M = 22, CW = W - M * 2;
     const ROT = [158, 12, 22], BLAU = [19, 51, 88];
     const GRAU = [140, 134, 124], DUNKEL = [44, 42, 38];
     const CREAM = [248, 246, 241];
 
-    doc.setFillColor(...ROT);
+    doc.setFillColor(158, 12, 22);
     doc.rect(0, 0, W, 24, 'F');
-    doc.setFont('times', 'normal');
-    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
     doc.setTextColor(255, 255, 255);
     doc.text('IKIGAI Kompass', M, 11);
     doc.setFont('helvetica', 'normal');
@@ -979,54 +983,54 @@ function downloadPDF() {
     let y = 34;
 
     const eingaben = [
-      { label: 'Was du liebst', col: ROT, items: data[1] },
-      { label: 'Was du gut kannst', col: BLAU, items: data[2] },
-      { label: 'Was die Welt braucht', col: [26, 92, 62], items: data[3] },
-      { label: 'Wofuer du bezahlt wirst', col: [138, 98, 8], items: data[4] }
+      { label: 'Was du liebst', items: data[1] },
+      { label: 'Was du gut kannst', items: data[2] },
+      { label: 'Was die Welt braucht', items: data[3] },
+      { label: 'Wofuer du bezahlt wirst', items: data[4] }
     ];
 
     for (const e of eingaben) {
-      doc.setFillColor(...CREAM);
+      doc.setFillColor(248, 246, 241);
       doc.rect(M, y, CW, 7, 'F');
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8.5);
-      doc.setTextColor(...e.col);
+      doc.setTextColor(44, 42, 38);
       doc.text(e.label, M + 3, y + 5);
       y += 9;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
-      doc.setTextColor(...DUNKEL);
-      const line = e.items.join('  |  ');
-      const wrapped = doc.splitTextToSize(line, CW - 6);
+      doc.setTextColor(44, 42, 38);
+      const line = (e.items || []).join('  |  ');
+      const wrapped = doc.splitTextToSize(line || '-', CW - 6);
       doc.text(wrapped, M + 3, y);
       y += wrapped.length * 5 + 4;
     }
 
     y += 4;
-    doc.setDrawColor(...ROT);
+    doc.setDrawColor(158, 12, 22);
     doc.setLineWidth(0.4);
     doc.line(M, y, W - M, y);
     y += 8;
 
     const sections = [
-      { label: 'DEIN LEBENSSINN', text: analyseResult.kern, serif: true, col: ROT },
-      { label: 'PASSION & BERUFUNG', text: analyseResult.passion, serif: false, col: BLAU },
-      { label: 'EMPFEHLUNGEN', text: analyseResult.empfehlungen, serif: false, col: BLAU },
-      { label: 'NAECHSTE SCHRITTE', text: analyseResult.schritte, serif: false, col: BLAU },
-      { label: 'DEIN PERSOENLICHER SATZ', text: analyseResult.satz, serif: true, col: ROT }
+      { label: 'DEIN LEBENSSINN', text: analyseResult.kern },
+      { label: 'PASSION & BERUFUNG', text: analyseResult.passion },
+      { label: 'EMPFEHLUNGEN', text: analyseResult.empfehlungen },
+      { label: 'NAECHSTE SCHRITTE', text: analyseResult.schritte },
+      { label: 'DEIN PERSOENLICHER SATZ', text: analyseResult.satz }
     ];
 
     for (const s of sections) {
       if (y > 265) { doc.addPage(); y = 20; }
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(7.5);
-      doc.setTextColor(...GRAU);
-      doc.text(s.label, M, y);
+      doc.setTextColor(140, 134, 124);
+      doc.text(s.label || '', M, y);
       y += 5;
-      doc.setFont(s.serif ? 'times' : 'helvetica', s.serif ? 'italic' : 'normal');
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
-      doc.setTextColor(...DUNKEL);
-      const wrapped = doc.splitTextToSize(s.text || '', CW);
+      doc.setTextColor(44, 42, 38);
+      const wrapped = doc.splitTextToSize(s.text || '-', CW);
       doc.text(wrapped, M, y);
       y += wrapped.length * 5.5 + 7;
     }
@@ -1034,14 +1038,15 @@ function downloadPDF() {
     const today = new Date().toLocaleDateString('de-AT');
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
-    doc.setTextColor(...GRAU);
+    doc.setTextColor(140, 134, 124);
     doc.text('Erstellt am ' + today + '  |  IKIGAI Kompass  |  steinwendner.info', M, 289);
 
     doc.save('IKIGAI-Kompass-' + new Date().toISOString().slice(0,10) + '.pdf');
-  } catch(e) {
-    alert('PDF konnte nicht erstellt werden: ' + e.message);
+  } catch(err) {
+    alert('PDF Fehler: ' + err.message);
   }
 }
+
 
 goScreen(0);
 </script>
