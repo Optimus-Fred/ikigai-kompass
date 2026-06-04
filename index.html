@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IKIGAI Kompass · Erich Steinwendner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #f8f6f1;
+  --warm-gray: #e8e4dc;
+  --mid-gray: #9e9890;
+  --dark: #2c2a26;
+  --text: #3a3830;
+  --text-light: #7a756c;
+  --accent: #9E0C16;
+  --blau: #133358;
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Montserrat', sans-serif;
+}
+
+html { font-size: 16px; }
+body {
+  background: #fff;
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 300;
+  min-height: 100vh;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* ── HEADER ── */
+.header {
+  text-align: center;
+  padding: 4rem 2rem 2.5rem;
+}
+
+.header-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  letter-spacing: 0.04em;
+  color: var(--dark);
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+
+.header-title em {
+  font-style: italic;
+  font-weight: 300;
+}
+
+.header-rule {
+  width: 40px;
+  height: 1px;
+  background: var(--mid-gray);
+  margin: 1.2rem auto;
+}
+
+.header-sub {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  line-height: 2;
+}
+
+/* ── DISCLAIMER BOX ── */
+.disclaimer {
+  background: var(--cream);
+  border-radius: 12px;
+  padding: 1.1rem 1.6rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-light);
+  line-height: 1.75;
+  margin: 0 auto 2.5rem;
+  max-width: 580px;
+}
+.disclaimer a {
+  color: var(--blau);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.disclaimer em { font-family: var(--serif); font-style: italic; }
+
+/* ── PROGRESS ── */
+.progress-wrap {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 2.5rem;
+}
+.p-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--warm-gray);
+  transition: background 0.3s;
+}
+.p-dot.done { background: var(--blau); }
+.p-dot.active { background: var(--accent); }
+
+/* ── SCREENS ── */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── INTRO SCREEN ── */
+.intro-text {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1.9;
+  text-align: center;
+  margin-bottom: 2rem;
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.quad-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--warm-gray);
+  border: 1px solid var(--warm-gray);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0 auto 2.5rem;
+  max-width: 520px;
+}
+.quad {
+  background: #fff;
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+.quad-icon {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.q1 .quad-icon { background: #fdf0f1; }
+.q2 .quad-icon { background: #edf1f7; }
+.q3 .quad-icon { background: #edf5f1; }
+.q4 .quad-icon { background: #fdf6e3; }
+
+/* ── CTA / BUTTONS ── */
+.btn-center { text-align: center; margin: 2rem 0; }
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 36px;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover { opacity: 0.85; }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  background: transparent;
+  border: 1px solid var(--warm-gray);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-ghost:hover { border-color: var(--mid-gray); color: var(--text); }
+
+.btn-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 36px;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--blau);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-pdf:hover { opacity: 0.85; }
+
+/* ── BEREICH SCREENS ── */
+.bereich-section {
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+.schritt-label {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mid-gray);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.bereich-title-wrap {
+  text-align: center;
+  margin-bottom: 1.8rem;
+}
+
+.bereich-icon-circle {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  margin: 0 auto 1rem;
+}
+
+.bereich-title {
+  font-family: var(--serif);
+  font-size: 1.9rem;
+  font-weight: 300;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.6rem;
+}
+
+.bereich-desc {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  line-height: 1.8;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.suggest-label {
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--mid-gray);
+  margin-bottom: 10px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 1.2rem;
+}
+
+.chip {
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  border-radius: 2px;
+  border: 1px solid var(--warm-gray);
+  background: #fff;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--sans);
+  font-weight: 300;
+}
+.chip:hover { border-color: var(--mid-gray); color: var(--text); }
+.chip.sel { background: var(--cream); border-color: var(--mid-gray); color: var(--text); font-weight: 400; }
+.chip.sel-1 { background: #fdf0f1; border-color: #e08088; color: var(--accent); }
+.chip.sel-2 { background: #edf1f7; border-color: #7a9cc8; color: var(--blau); }
+.chip.sel-3 { background: #edf5f1; border-color: #6ab89a; color: #1a5c3e; }
+.chip.sel-4 { background: #fdf6e3; border-color: #d4a832; color: #8a6208; }
+
+.own-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.own-input {
+  flex: 1;
+  padding: 10px 14px;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 300;
+  color: var(--text);
+  border: 1px solid var(--warm-gray);
+  border-radius: 2px;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.own-input:focus { border-color: var(--mid-gray); }
+.own-input::placeholder { color: var(--mid-gray); }
+
+.own-add {
+  padding: 10px 18px;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--text-light);
+  border: 1px solid var(--warm-gray);
+  border-radius: 2px;
+  background: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s;
+}
+.own-add:hover { border-color: var(--mid-gray); }
+
+.tags-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 32px;
+  margin: 10px 0 6px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px 4px 14px;
+  font-size: 0.78rem;
+  border-radius: 2px;
+  letter-spacing: 0.04em;
+}
+.tag-x {
+  cursor: pointer;
+  font-size: 13px;
+  opacity: 0.55;
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  padding: 0;
+  line-height: 1;
+}
+.tag-x:hover { opacity: 1; }
+.t1 { background: #fdf0f1; color: var(--accent); border: 1px solid #e9a0a5; }
+.t2 { background: #edf1f7; color: var(--blau); border: 1px solid #7a9cc8; }
+.t3 { background: #edf5f1; color: #1a5c3e; border: 1px solid #6ab89a; }
+.t4 { background: #fdf6e3; color: #8a6208; border: 1px solid #d4a832; }
+
+.hint-text {
+  font-size: 0.75rem;
+  color: var(--mid-gray);
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+}
+
+.nav-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 2rem;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  width: 40px;
+  height: 1px;
+  background: var(--warm-gray);
+  margin: 2rem auto;
+}
+
+/* ── EINLADUNG ── */
+.einladung-wrap {
+  text-align: center;
+  border: 1px solid var(--warm-gray);
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+  max-width: 540px;
+  margin: 0 auto 2rem;
+}
+.einladung-title {
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--dark);
+  margin-bottom: 10px;
+}
+.einladung-sub {
+  font-size: 0.84rem;
+  color: var(--text-light);
+  line-height: 1.8;
+  margin-bottom: 1.8rem;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  max-width: 580px;
+  margin: 1.5rem auto;
+}
+.summary-card {
+  background: var(--cream);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.summary-card-label {
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.summary-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.stag {
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 2px;
+  letter-spacing: 0.03em;
+}
+
+/* ── ANALYSE / RESULT ── */
+.loading-wrap {
+  text-align: center;
+  padding: 3rem 0;
+}
+.spinner {
+  display: inline-block;
+  width: 28px; height: 28px;
+  border: 2px solid var(--warm-gray);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin-bottom: 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mid-gray);
+}
+
+.result-wrap {
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+.kern-block {
+  background: var(--cream);
+  border-left: 3px solid var(--accent);
+  padding: 1.2rem 1.6rem;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 2rem;
+}
+.kern-label {
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.kern-text {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--dark);
+  line-height: 1.8;
+}
+
+.result-block {
+  margin-bottom: 1.8rem;
+}
+.result-block-label {
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mid-gray);
+  margin-bottom: 8px;
+}
+.result-block-text {
+  font-size: 0.88rem;
+  color: var(--text);
+  line-height: 1.85;
+}
+
+.satz-block {
+  border: 1px solid var(--warm-gray);
+  border-radius: 8px;
+  padding: 1.4rem 1.8rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.satz-text {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--blau);
+  line-height: 1.75;
+}
+
+.pdf-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  padding: 2.5rem 2rem 3rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mid-gray);
+  border-top: 1px solid var(--warm-gray);
+  margin-top: 3rem;
+}
+.footer a { color: var(--blau); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+
+@media (max-width: 520px) {
+  .quad-grid { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: 1fr; }
+  .header-title { font-size: 2rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-title">IKIGAI <em>Kompass</em></div>
+    <div class="header-rule"></div>
+    <div class="header-sub">
+      Lebenssinn &amp; persönliche Ausrichtung<br>
+      Erich Steinwendner · IMPULSGEBER
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    Dieser Kompass ist keine wissenschaftliche Analyse. Er basiert auf dem japanischen Konzept des <em>Ikigai</em> – dem „Lebenssinn" – und dient der persönlichen Reflexion und Orientierung. Mehr unter <a href="https://steinwendner.info" target="_blank">steinwendner.info</a>
+  </div>
+
+  <!-- PROGRESS DOTS -->
+  <div class="progress-wrap" id="progress-dots">
+    <div class="p-dot" id="d0"></div>
+    <div class="p-dot" id="d1"></div>
+    <div class="p-dot" id="d2"></div>
+    <div class="p-dot" id="d3"></div>
+    <div class="p-dot" id="d4"></div>
+    <div class="p-dot" id="d5"></div>
+  </div>
+
+  <!-- S0: INTRO -->
+  <div id="s0" class="screen active">
+    <p class="intro-text">
+      <em>Ikigai</em> (生き甲斐) – das japanische Wort für Lebenssinn.<br>
+      Es ist der Ort, wo sich vier Kräfte treffen: was du liebst, was du kannst, was die Welt braucht – und wofür du bezahlt wirst.<br><br>
+      Dieser Kompass begleitet dich auf dem Weg dorthin.
+    </p>
+
+    <div class="quad-grid">
+      <div class="quad q1">
+        <div class="quad-icon">❤️</div>
+        <span>Was du liebst</span>
+      </div>
+      <div class="quad q2">
+        <div class="quad-icon">💡</div>
+        <span>Was du kannst</span>
+      </div>
+      <div class="quad q3">
+        <div class="quad-icon">🌱</div>
+        <span>Was die Welt braucht</span>
+      </div>
+      <div class="quad q4">
+        <div class="quad-icon">✦</div>
+        <span>Wofür du bezahlt wirst</span>
+      </div>
+    </div>
+
+    <div class="btn-center">
+      <button class="btn-primary" onclick="goScreen(1)">
+        Kompass starten
+      </button>
+    </div>
+  </div>
+
+  <!-- S1: WAS DU LIEBST -->
+  <div id="s1" class="screen">
+    <div class="bereich-section">
+      <div class="schritt-label">Schritt 1 von 4</div>
+      <div class="bereich-title-wrap">
+        <div class="bereich-icon-circle" style="background:#fdf0f1;">❤️</div>
+        <div class="bereich-title" style="color:var(--accent);">Was du liebst</div>
+        <p class="bereich-desc">
+          Was begeistert dich wirklich? Was tust du, weil es dich von innen heraus erfüllt – ganz unabhängig davon, ob du dafür bezahlt wirst? Was lässt dich die Zeit vergessen und gibt dir Energie statt sie zu nehmen?
+        </p>
+      </div>
+      <div class="suggest-label">Vorschläge – klick zum Auswählen</div>
+      <div class="chip-row" id="chips-1"></div>
+      <div class="own-row">
+        <input class="own-input" type="text" id="inp-1" placeholder="Eigenen Begriff eingeben …" onkeydown="if(event.key==='Enter')addOwn(1)">
+        <button class="own-add" onclick="addOwn(1)">+ Hinzufügen</button>
+      </div>
+      <div class="tags-area" id="tags-1"></div>
+      <p class="hint-text">Mindestens 2 Einträge empfohlen.</p>
+      <div class="nav-row">
+        <button class="btn-primary" onclick="nextStep(1)">Weiter →</button>
+        <button class="btn-ghost" onclick="goScreen(0)">← Zurück</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2: WAS DU KANNST -->
+  <div id="s2" class="screen">
+    <div class="bereich-section">
+      <div class="schritt-label">Schritt 2 von 4</div>
+      <div class="bereich-title-wrap">
+        <div class="bereich-icon-circle" style="background:#edf1f7;">💡</div>
+        <div class="bereich-title" style="color:var(--blau);">Was du gut kannst</div>
+        <p class="bereich-desc">
+          Welche Fähigkeiten und Stärken hast du – durch Erfahrung, Ausbildung oder natürliches Talent? Was schätzen andere an dir? Denke auch an Soft Skills: Zuhören, Strukturieren, Begeistern, Führen.
+        </p>
+      </div>
+      <div class="suggest-label">Vorschläge – klick zum Auswählen</div>
+      <div class="chip-row" id="chips-2"></div>
+      <div class="own-row">
+        <input class="own-input" type="text" id="inp-2" placeholder="Eigenen Begriff eingeben …" onkeydown="if(event.key==='Enter')addOwn(2)">
+        <button class="own-add" onclick="addOwn(2)">+ Hinzufügen</button>
+      </div>
+      <div class="tags-area" id="tags-2"></div>
+      <p class="hint-text">Sei großzügig mit dir – was sagen andere über deine Stärken?</p>
+      <div class="nav-row">
+        <button class="btn-primary" onclick="nextStep(2)">Weiter →</button>
+        <button class="btn-ghost" onclick="goScreen(1)">← Zurück</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3: WAS DIE WELT BRAUCHT -->
+  <div id="s3" class="screen">
+    <div class="bereich-section">
+      <div class="schritt-label">Schritt 3 von 4</div>
+      <div class="bereich-title-wrap">
+        <div class="bereich-icon-circle" style="background:#edf5f1;">🌱</div>
+        <div class="bereich-title" style="color:#1a5c3e;">Was die Welt braucht</div>
+        <p class="bereich-desc">
+          Wo siehst du echte Bedürfnisse, Lücken oder Herausforderungen – in deiner Gemeinschaft, in deinem Umfeld, in der Gesellschaft? Wofür ist Bedarf da? Was fehlt den Menschen um dich herum?
+        </p>
+      </div>
+      <div class="suggest-label">Vorschläge – klick zum Auswählen</div>
+      <div class="chip-row" id="chips-3"></div>
+      <div class="own-row">
+        <input class="own-input" type="text" id="inp-3" placeholder="Eigenen Begriff eingeben …" onkeydown="if(event.key==='Enter')addOwn(3)">
+        <button class="own-add" onclick="addOwn(3)">+ Hinzufügen</button>
+      </div>
+      <div class="tags-area" id="tags-3"></div>
+      <p class="hint-text">Denke groß und klein – vom Nachbarn bis zur Gesellschaft.</p>
+      <div class="nav-row">
+        <button class="btn-primary" onclick="nextStep(3)">Weiter →</button>
+        <button class="btn-ghost" onclick="goScreen(2)">← Zurück</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4: WOFÜR DU BEZAHLT WIRST -->
+  <div id="s4" class="screen">
+    <div class="bereich-section">
+      <div class="schritt-label">Schritt 4 von 4</div>
+      <div class="bereich-title-wrap">
+        <div class="bereich-icon-circle" style="background:#fdf6e3;">✦</div>
+        <div class="bereich-title" style="color:#8a6208;">Wofür du bezahlt wirst</div>
+        <p class="bereich-desc">
+          Was honorieren andere – finanziell oder durch Wertschätzung? Womit verdienst du deinen Lebensunterhalt, oder könntest es? Hier zählen auch Potenziale und zukünftige Möglichkeiten.
+        </p>
+      </div>
+      <div class="suggest-label">Vorschläge – klick zum Auswählen</div>
+      <div class="chip-row" id="chips-4"></div>
+      <div class="own-row">
+        <input class="own-input" type="text" id="inp-4" placeholder="Eigenen Begriff eingeben …" onkeydown="if(event.key==='Enter')addOwn(4)">
+        <button class="own-add" onclick="addOwn(4)">+ Hinzufügen</button>
+      </div>
+      <div class="tags-area" id="tags-4"></div>
+      <p class="hint-text">Auch Honorare, Ehrenamt mit Aufwandsentschädigung oder künftige Möglichkeiten zählen.</p>
+      <div class="nav-row">
+        <button class="btn-primary" onclick="nextStep(4)">Weiter →</button>
+        <button class="btn-ghost" onclick="goScreen(3)">← Zurück</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- S5: EINLADUNG -->
+  <div id="s5" class="screen">
+    <div class="einladung-wrap">
+      <div class="einladung-title">Bereit für deinen Lebenssinn</div>
+      <div class="divider"></div>
+      <p class="einladung-sub">
+        Du hast alle vier Bereiche ausgefüllt. Jetzt verbindet der IKIGAI Kompass deine Antworten und zeigt dir deinen persönlichen Lebenssinn – mit Empfehlungen und ersten nächsten Schritten.
+      </p>
+      <button class="btn-primary" onclick="startAnalyse()">
+        IKIGAI Analyse starten
+      </button>
+    </div>
+
+    <p style="font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid-gray);text-align:center;margin-bottom:1rem;">Deine Eingaben im Überblick</p>
+    <div class="summary-grid" id="summary-grid"></div>
+
+    <div class="btn-center" style="margin-top:1.5rem;">
+      <button class="btn-ghost" onclick="goScreen(4)">← Bearbeiten</button>
+    </div>
+  </div>
+
+  <!-- S6: ANALYSE / RESULT -->
+  <div id="s6" class="screen">
+    <div id="loading-box" class="loading-wrap">
+      <div class="spinner"></div>
+      <div class="loading-text">Analyse wird erstellt …</div>
+    </div>
+
+    <div id="result-box" style="display:none;">
+      <div class="result-wrap">
+        <div class="kern-block">
+          <div class="kern-label">Dein IKIGAI · Lebenssinn</div>
+          <div class="kern-text" id="res-kern"></div>
+        </div>
+
+        <div class="result-block">
+          <div class="result-block-label">Passion &amp; Berufung</div>
+          <div class="result-block-text" id="res-passion"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="result-block">
+          <div class="result-block-label">Empfehlungen</div>
+          <div class="result-block-text" id="res-empf"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="result-block">
+          <div class="result-block-label">Nächste Schritte</div>
+          <div class="result-block-text" id="res-schritte"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="satz-block">
+          <div class="satz-text" id="res-satz"></div>
+        </div>
+
+        <div class="pdf-row">
+          <button class="btn-pdf" onclick="downloadPDF()">
+            PDF speichern
+          </button>
+          <button class="btn-ghost" onclick="resetTool()">
+            Neu starten
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    IKIGAI Kompass · Erich Steinwendner · <a href="https://steinwendner.info" target="_blank">steinwendner.info</a><br>
+    Ein Tool von IMPULSGEBER · Persönlichkeitsanalyse &amp; Coaching
+  </div>
+
+</div><!-- /page -->
+
+<script>
+const VORSCHLAEGE = {
+  1: ['Menschen begleiten','Schreiben','Lehren','Gestalten','Führen','Musik &amp; Kunst','Natur &amp; Draußen','Diskutieren','Lesen','Fotografieren','Organisieren','Forschen','Sport','Reisen','Kochen'],
+  2: ['Moderieren','Analysieren','Motivieren','Konzipieren','Kommunizieren','Verhandeln','Zuhören','Präsentieren','Vernetzen','Planen','Problemlösen','Schreiben','Coachen','Unterrichten','Koordinieren'],
+  3: ['Gemeinschaft stärken','Demokratie fördern','Bildung','Orientierung geben','Brücken bauen','Vertrauen schaffen','Jugend begleiten','Nachhaltigkeit','Soziale Gerechtigkeit','Konfliktlösung','Integration','Gesundheit','Kultur','Ehrenamt','Regionale Entwicklung'],
+  4: ['Beratung','Training','Coaching','Vortrag','Moderation','Bücher schreiben','Workshops','Projektleitung','Unterricht','Verwaltung','Soziale Arbeit','Kreativwirtschaft','Handwerk','Pflege','Führung']
+};
+
+const TAGCLASS = { 1: 't1', 2: 't2', 3: 't3', 4: 't4' };
+const CHIPSEL  = { 1: 'sel-1', 2: 'sel-2', 3: 'sel-3', 4: 'sel-4' };
+const LABELS   = { 1: 'Was du liebst', 2: 'Was du gut kannst', 3: 'Was die Welt braucht', 4: 'Wofür du bezahlt wirst' };
+const LABELCOL = { 1: 'var(--accent)', 2: 'var(--blau)', 3: '#1a5c3e', 4: '#8a6208' };
+const data = { 1: [], 2: [], 3: [], 4: [] };
+let analyseResult = null;
+
+function goScreen(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  for (let i = 0; i < 6; i++) {
+    const d = document.getElementById('d'+i);
+    d.className = 'p-dot' + (i < n ? ' done' : i === n ? ' active' : '');
+  }
+  if (n >= 1 && n <= 4) renderChips(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderChips(nr) {
+  const el = document.getElementById('chips-'+nr);
+  el.innerHTML = VORSCHLAEGE[nr].map(v => {
+    const vClean = v.replace(/&amp;/g, '&');
+    const sel = data[nr].includes(vClean) ? CHIPSEL[nr] : '';
+    return `<span class="chip ${sel}" onclick="toggleChip(${nr},'${vClean.replace(/'/g,"\\'")}')">${v}</span>`;
+  }).join('');
+}
+
+function renderTags(nr) {
+  const el = document.getElementById('tags-'+nr);
+  el.innerHTML = data[nr].map((t, i) =>
+    `<span class="tag ${TAGCLASS[nr]}">${t}<button class="tag-x" onclick="removeTag(${nr},${i})" aria-label="Entfernen">×</button></span>`
+  ).join('');
+}
+
+function toggleChip(nr, val) {
+  const idx = data[nr].indexOf(val);
+  if (idx >= 0) data[nr].splice(idx, 1);
+  else data[nr].push(val);
+  renderChips(nr);
+  renderTags(nr);
+}
+
+function addOwn(nr) {
+  const inp = document.getElementById('inp-'+nr);
+  const v = inp.value.trim();
+  if (!v || data[nr].includes(v)) { inp.value = ''; return; }
+  data[nr].push(v);
+  inp.value = '';
+  renderChips(nr);
+  renderTags(nr);
+}
+
+function removeTag(nr, idx) {
+  data[nr].splice(idx, 1);
+  renderChips(nr);
+  renderTags(nr);
+}
+
+function nextStep(nr) {
+  if (!data[nr].length) {
+    alert('Bitte wähle mindestens einen Begriff aus oder gib einen eigenen ein.');
+    return;
+  }
+  if (nr < 4) goScreen(nr + 1);
+  else showEinladung();
+}
+
+function showEinladung() {
+  let html = '';
+  for (let i = 1; i <= 4; i++) {
+    const col = LABELCOL[i];
+    const tc = TAGCLASS[i];
+    html += `<div class="summary-card">
+      <div class="summary-card-label" style="color:${col}">${LABELS[i]}</div>
+      <div class="summary-tags-row">${data[i].map(t=>`<span class="stag tag ${tc}">${t}</span>`).join('')}</div>
+    </div>`;
+  }
+  document.getElementById('summary-grid').innerHTML = html;
+  goScreen(5);
+}
+
+async function startAnalyse() {
+  goScreen(6);
+  document.getElementById('loading-box').style.display = 'block';
+  document.getElementById('result-box').style.display = 'none';
+
+  const prompt = `Du bist ein einfühlsamer Coach, der Menschen hilft, ihren persönlichen Lebenssinn (Ikigai) zu entdecken.
+
+Die Person hat folgendes angegeben:
+- Was sie liebt: ${data[1].join(', ')}
+- Was sie gut kann: ${data[2].join(', ')}
+- Was die Welt braucht: ${data[3].join(', ')}
+- Wofür sie bezahlt wird: ${data[4].join(', ')}
+
+Erstelle eine persönliche IKIGAI-Analyse auf Deutsch. Antworte NUR mit einem JSON-Objekt, keinerlei Markdown, keinerlei Backticks, keine Einleitung:
+{
+  "kern": "2 Sätze: Der persönliche Lebenssinn (Ikigai) dieser Person – konkret, warmherzig, auf die echten Eingaben bezogen.",
+  "passion": "3 Sätze: Was Leidenschaft, Stärken und gesellschaftlichen Bedarf verbindet. Persönlich und ermutigend.",
+  "empfehlungen": "3–4 konkrete Empfehlungen als Fließtext, personalisiert. Kein Aufzählungszeichen.",
+  "schritte": "3 konkrete erste Schritte als Fließtext. Praktisch und ermutigend. Kein Aufzählungszeichen.",
+  "satz": "Ein einziger persönlicher Satz, der das Ikigai dieser Person in Worte fasst – wie ein Leitsatz, den man sich merkt."
+}`;
+
+  try {
+    const resp = await fetch('/api/analyse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const d = await resp.json();
+    const txt = d.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    const clean = txt.replace(/```json|```/g, '').trim();
+    analyseResult = JSON.parse(clean);
+
+    document.getElementById('res-kern').textContent = analyseResult.kern;
+    document.getElementById('res-passion').textContent = analyseResult.passion;
+    document.getElementById('res-empf').textContent = analyseResult.empfehlungen;
+    document.getElementById('res-schritte').textContent = analyseResult.schritte;
+    document.getElementById('res-satz').textContent = '„' + analyseResult.satz + '"';
+
+    document.getElementById('loading-box').style.display = 'none';
+    document.getElementById('result-box').style.display = 'block';
+  } catch(e) {
+    document.getElementById('loading-box').innerHTML =
+      '<p style="color:var(--mid-gray);font-size:0.82rem;text-align:center;">Die Analyse konnte nicht geladen werden.<br>Bitte lade die Seite neu und versuche es erneut.</p>';
+  }
+}
+
+function resetTool() {
+  data[1]=[]; data[2]=[]; data[3]=[]; data[4]=[];
+  analyseResult = null;
+  goScreen(0);
+}
+
+function wrapText(doc, text, x, y, maxW, lineH) {
+  const lines = doc.splitTextToSize(text, maxW);
+  doc.text(lines, x, y);
+  return y + lines.length * lineH;
+}
+
+function downloadPDF() {
+  if (!analyseResult) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, M = 22, CW = W - M * 2;
+  const ROT = [158, 12, 22], BLAU = [19, 51, 88], GRAU = [140, 134, 124], DUNKEL = [44, 42, 38];
+  const CREAM_R = 248, CREAM_G = 246, CREAM_B = 241;
+
+  // Header Bar
+  doc.setFillColor(...ROT);
+  doc.rect(0, 0, W, 24, 'F');
+  doc.setFont('times', 'normal');
+  doc.setFontSize(18);
+  doc.setTextColor(255, 255, 255);
+  doc.text('IKIGAI Kompass', M, 11);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text('Lebenssinn & persönliche Ausrichtung  ·  Erich Steinwendner  ·  steinwendner.info', M, 18);
+
+  let y = 34;
+
+  // Eingaben
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(...GRAU);
+  doc.setLetterSpacing(1);
+  doc.text('DEINE EINGABEN', M, y);
+  doc.setLetterSpacing(0);
+  y += 5;
+
+  const eingaben = [
+    { label: 'Was du liebst', col: ROT, items: data[1] },
+    { label: 'Was du gut kannst', col: BLAU, items: data[2] },
+    { label: 'Was die Welt braucht', col: [26, 92, 62], items: data[3] },
+    { label: 'Wofür du bezahlt wirst', col: [138, 98, 8], items: data[4] }
+  ];
+
+  for (const e of eingaben) {
+    doc.setFillColor(CREAM_R, CREAM_G, CREAM_B);
+    doc.rect(M, y, CW, 7, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...e.col);
+    doc.text(e.label, M + 3, y + 5);
+    y += 9;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...DUNKEL);
+    const line = e.items.join('  ·  ');
+    const wrapped = doc.splitTextToSize(line, CW - 6);
+    doc.text(wrapped, M + 3, y);
+    y += wrapped.length * 5 + 4;
+  }
+
+  // Rule
+  y += 3;
+  doc.setDrawColor(...ROT);
+  doc.setLineWidth(0.4);
+  doc.line(M, y, W - M, y);
+  y += 8;
+
+  // Analyse sections
+  const sections = [
+    { label: 'DEIN LEBENSSINN · IKIGAI-KERN', text: analyseResult.kern, col: ROT, serif: true },
+    { label: 'PASSION & BERUFUNG', text: analyseResult.passion, col: BLAU, serif: false },
+    { label: 'EMPFEHLUNGEN', text: analyseResult.empfehlungen, col: BLAU, serif: false },
+    { label: 'NÄCHSTE SCHRITTE', text: analyseResult.schritte, col: BLAU, serif: false },
+    { label: 'DEIN PERSÖNLICHER SATZ', text: '„' + analyseResult.satz + '"', col: ROT, serif: true }
+  ];
+
+  for (const s of sections) {
+    if (y > 265) { doc.addPage(); y = 20; }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...GRAU);
+    doc.setLetterSpacing(1.2);
+    doc.text(s.label, M, y);
+    doc.setLetterSpacing(0);
+    y += 5;
+    doc.setFont(s.serif ? 'times' : 'helvetica', s.serif ? 'italic' : 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...DUNKEL);
+    const wrapped = doc.splitTextToSize(s.text, CW);
+    doc.text(wrapped, M, y);
+    y += wrapped.length * 5.5 + 7;
+  }
+
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= pageCount; p++) {
+    doc.setPage(p);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...GRAU);
+    const today = new Date().toLocaleDateString('de-AT');
+    doc.text(`Erstellt am ${today}  ·  IKIGAI Kompass  ·  Erich Steinwendner  ·  steinwendner.info`, M, 289);
+  }
+
+  doc.save('IKIGAI-Kompass-' + new Date().toISOString().slice(0,10) + '.pdf');
+}
+
+goScreen(0);
+</script>
+</body>
+</html>
