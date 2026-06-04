@@ -965,81 +965,108 @@ function downloadPDF() {
     const { jsPDF } = window.jspdf;
     if (!jsPDF) { alert('PDF-Bibliothek nicht geladen. Bitte Seite neu laden.'); return; }
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    const W = 210, M = 22, CW = W - M * 2;
-    const ROT = [158, 12, 22], BLAU = [19, 51, 88];
-    const GRAU = [140, 134, 124], DUNKEL = [44, 42, 38];
-    const CREAM = [248, 246, 241];
+    const W = 210, M = 25, CW = W - M * 2;
+    const ROT = [158, 12, 22];
+    const DUNKEL = [44, 42, 38];
+    const HELL = [130, 124, 116];
+    const CREAM_BG = [248, 246, 241];
 
-    doc.setFillColor(158, 12, 22);
-    doc.rect(0, 0, W, 24, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
-    doc.setTextColor(255, 255, 255);
-    doc.text('IKIGAI Kompass', M, 11);
+    // Disclaimer Box oben
+    doc.setFillColor(248, 246, 241);
+    doc.roundedRect(M, 14, CW, 16, 3, 3, 'F');
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.text('Lebenssinn & persoenliche Ausrichtung  |  Erich Steinwendner  |  steinwendner.info', M, 18);
+    doc.setTextColor(130, 124, 116);
+    const disclaimer = 'Dieser Kompass basiert auf dem japanischen Konzept des Ikigai – dem Lebenssinn – und dient der persoenlichen Reflexion. Mehr unter steinwendner.info';
+    const dLines = doc.splitTextToSize(disclaimer, CW - 10);
+    const dStartY = 14 + (16 - dLines.length * 4) / 2 + 3;
+    doc.text(dLines, W / 2, dStartY, { align: 'center' });
 
-    let y = 34;
+    // Name & Titel zentriert
+    doc.setFont('times', 'italic');
+    doc.setFontSize(32);
+    doc.setTextColor(44, 42, 38);
+    doc.text('IKIGAI Kompass', W / 2, 50, { align: 'center' });
 
-    const eingaben = [
-      { label: 'Was du liebst', items: data[1] },
-      { label: 'Was du gut kannst', items: data[2] },
-      { label: 'Was die Welt braucht', items: data[3] },
-      { label: 'Wofuer du bezahlt wirst', items: data[4] }
-    ];
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(130, 124, 116);
+    doc.setCharSpace(2);
+    doc.text('LEBENSSINN  &  PERSOENLICHE AUSRICHTUNG', W / 2, 57, { align: 'center' });
+    doc.setCharSpace(0);
 
-    for (const e of eingaben) {
-      doc.setFillColor(248, 246, 241);
-      doc.rect(M, y, CW, 7, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8.5);
-      doc.setTextColor(44, 42, 38);
-      doc.text(e.label, M + 3, y + 5);
-      y += 9;
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(44, 42, 38);
-      const line = (e.items || []).join('  |  ');
-      const wrapped = doc.splitTextToSize(line || '-', CW - 6);
-      doc.text(wrapped, M + 3, y);
-      y += wrapped.length * 5 + 4;
-    }
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(130, 124, 116);
+    doc.text('Erich Steinwendner  ·  IMPULSGEBER', W / 2, 62, { align: 'center' });
 
-    y += 4;
-    doc.setDrawColor(158, 12, 22);
-    doc.setLineWidth(0.4);
-    doc.line(M, y, W - M, y);
-    y += 8;
+    // Trennlinie
+    doc.setDrawColor(220, 216, 208);
+    doc.setLineWidth(0.3);
+    doc.line(M, 68, W - M, 68);
 
+    let y = 78;
+
+    // Abschnitte
     const sections = [
-      { label: 'DEIN LEBENSSINN', text: analyseResult.kern },
-      { label: 'PASSION & BERUFUNG', text: analyseResult.passion },
-      { label: 'EMPFEHLUNGEN', text: analyseResult.empfehlungen },
-      { label: 'NAECHSTE SCHRITTE', text: analyseResult.schritte },
-      { label: 'DEIN PERSOENLICHER SATZ', text: analyseResult.satz }
+      { title: 'Dein Lebenssinn', text: analyseResult.kern },
+      { title: 'Passion & Berufung', text: analyseResult.passion },
+      { title: 'Empfehlungen', text: analyseResult.empfehlungen },
+      { title: 'Naechste Schritte', text: analyseResult.schritte }
     ];
 
     for (const s of sections) {
-      if (y > 265) { doc.addPage(); y = 20; }
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.5);
-      doc.setTextColor(140, 134, 124);
-      doc.text(s.label || '', M, y);
-      y += 5;
+      if (y > 255) { doc.addPage(); y = 25; }
+
+      // Roter Titel
+      doc.setFont('times', 'normal');
+      doc.setFontSize(15);
+      doc.setTextColor(158, 12, 22);
+      doc.text(s.title, M, y);
+      y += 7;
+
+      // Fließtext
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.setTextColor(44, 42, 38);
-      const wrapped = doc.splitTextToSize(s.text || '-', CW);
+      const wrapped = doc.splitTextToSize(s.text || '', CW);
       doc.text(wrapped, M, y);
-      y += wrapped.length * 5.5 + 7;
+      y += wrapped.length * 5.5;
+
+      // Trennlinie
+      y += 4;
+      doc.setDrawColor(220, 216, 208);
+      doc.setLineWidth(0.3);
+      doc.line(M, y, W - M, y);
+      y += 10;
     }
 
-    const today = new Date().toLocaleDateString('de-AT');
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    doc.setTextColor(140, 134, 124);
-    doc.text('Erstellt am ' + today + '  |  IKIGAI Kompass  |  steinwendner.info', M, 289);
+    // Persönlicher Satz – zentriert, kursiv, eingerahmt
+    if (y > 230) { doc.addPage(); y = 25; }
+    doc.setDrawColor(220, 216, 208);
+    doc.setLineWidth(0.3);
+    doc.rect(M, y, CW, 28, 'S');
+    doc.setFont('times', 'italic');
+    doc.setFontSize(12);
+    doc.setTextColor(19, 51, 88);
+    const satzLines = doc.splitTextToSize(analyseResult.satz || '', CW - 16);
+    const satzY = y + (28 - satzLines.length * 6) / 2 + 5;
+    doc.text(satzLines, W / 2, satzY, { align: 'center' });
+    y += 36;
+
+    // Footer auf jeder Seite
+    const pages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= pages; p++) {
+      doc.setPage(p);
+      doc.setDrawColor(220, 216, 208);
+      doc.setLineWidth(0.3);
+      doc.line(M, 282, W - M, 282);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(130, 124, 116);
+      doc.text('Basierend auf dem IKIGAI-Konzept  ·  steinwendner.info', M, 287);
+      doc.text(new Date().toLocaleDateString('de-AT'), W - M, 287, { align: 'right' });
+    }
 
     doc.save('IKIGAI-Kompass-' + new Date().toISOString().slice(0,10) + '.pdf');
   } catch(err) {
