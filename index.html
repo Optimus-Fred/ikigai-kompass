@@ -910,31 +910,21 @@ async function startAnalyse() {
   document.getElementById('loading-box').style.display = 'block';
   document.getElementById('result-box').style.display = 'none';
 
-  const prompt = `Du bist ein einfühlsamer Coach, der Menschen hilft, ihren persönlichen Lebenssinn (Ikigai) zu entdecken.
-
-Die Person hat folgendes angegeben:
-- Was sie liebt: ${data[1].join(', ')}
-- Was sie gut kann: ${data[2].join(', ')}
-- Was die Welt braucht: ${data[3].join(', ')}
-- Wofür sie bezahlt wird: ${data[4].join(', ')}
-
-Erstelle eine persönliche IKIGAI-Analyse auf Deutsch. Antworte NUR mit einem JSON-Objekt, keinerlei Markdown, keinerlei Backticks, keine Einleitung:
-{
-  "kern": "2 Sätze: Der persönliche Lebenssinn (Ikigai) dieser Person – konkret, warmherzig, auf die echten Eingaben bezogen.",
-  "passion": "3 Sätze: Was Leidenschaft, Stärken und gesellschaftlichen Bedarf verbindet. Persönlich und ermutigend.",
-  "empfehlungen": "3–4 konkrete Empfehlungen als Fließtext, personalisiert. Kein Aufzählungszeichen.",
-  "schritte": "3 konkrete erste Schritte als Fließtext. Praktisch und ermutigend. Kein Aufzählungszeichen.",
-  "satz": "Ein einziger persönlicher Satz, der das Ikigai dieser Person in Worte fasst – wie ein Leitsatz, den man sich merkt."
-}`;
+  const trim = arr => arr.slice(0, 8).join(', ');
+  const prompt = `Antworte NUR mit JSON, keine Backticks, keine Erklärung. IKIGAI-Analyse auf Deutsch für: Liebt: ${trim(data[1])} | Kann: ${trim(data[2])} | Welt braucht: ${trim(data[3])} | Bezahlt für: ${trim(data[4])}. JSON: {"kern":"1-2 Sätze persönlicher Lebenssinn","passion":"2 Sätze Leidenschaft und Stärken","empfehlungen":"2-3 Empfehlungen als Fließtext","schritte":"2-3 erste Schritte als Fließtext","satz":"1 persönlicher Leitsatz"}`;
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
     const resp = await fetch('/api/analyse', {
+      signal: controller.signal,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: [{ role: 'user', content: prompt }]
       })
     });
+    clearTimeout(timeout);
     const d = await resp.json();
     const txt = d.content.filter(b => b.type === 'text').map(b => b.text).join('');
     const clean = txt.replace(/```json|```/g, '').trim();
@@ -968,103 +958,89 @@ function wrapText(doc, text, x, y, maxW, lineH) {
 
 function downloadPDF() {
   if (!analyseResult) return;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const W = 210, M = 22, CW = W - M * 2;
-  const ROT = [158, 12, 22], BLAU = [19, 51, 88], GRAU = [140, 134, 124], DUNKEL = [44, 42, 38];
-  const CREAM_R = 248, CREAM_G = 246, CREAM_B = 241;
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const W = 210, M = 22, CW = W - M * 2;
+    const ROT = [158, 12, 22], BLAU = [19, 51, 88];
+    const GRAU = [140, 134, 124], DUNKEL = [44, 42, 38];
+    const CREAM = [248, 246, 241];
 
-  // Header Bar
-  doc.setFillColor(...ROT);
-  doc.rect(0, 0, W, 24, 'F');
-  doc.setFont('times', 'normal');
-  doc.setFontSize(18);
-  doc.setTextColor(255, 255, 255);
-  doc.text('IKIGAI Kompass', M, 11);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.text('Lebenssinn & persönliche Ausrichtung  ·  Erich Steinwendner  ·  steinwendner.info', M, 18);
-
-  let y = 34;
-
-  // Eingaben
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.setTextColor(...GRAU);
-  doc.setLetterSpacing(1);
-  doc.text('DEINE EINGABEN', M, y);
-  doc.setLetterSpacing(0);
-  y += 5;
-
-  const eingaben = [
-    { label: 'Was du liebst', col: ROT, items: data[1] },
-    { label: 'Was du gut kannst', col: BLAU, items: data[2] },
-    { label: 'Was die Welt braucht', col: [26, 92, 62], items: data[3] },
-    { label: 'Wofür du bezahlt wirst', col: [138, 98, 8], items: data[4] }
-  ];
-
-  for (const e of eingaben) {
-    doc.setFillColor(CREAM_R, CREAM_G, CREAM_B);
-    doc.rect(M, y, CW, 7, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
-    doc.setTextColor(...e.col);
-    doc.text(e.label, M + 3, y + 5);
-    y += 9;
+    doc.setFillColor(...ROT);
+    doc.rect(0, 0, W, 24, 'F');
+    doc.setFont('times', 'normal');
+    doc.setFontSize(18);
+    doc.setTextColor(255, 255, 255);
+    doc.text('IKIGAI Kompass', M, 11);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(...DUNKEL);
-    const line = e.items.join('  ·  ');
-    const wrapped = doc.splitTextToSize(line, CW - 6);
-    doc.text(wrapped, M + 3, y);
-    y += wrapped.length * 5 + 4;
-  }
+    doc.setFontSize(8);
+    doc.text('Lebenssinn & persoenliche Ausrichtung  |  Erich Steinwendner  |  steinwendner.info', M, 18);
 
-  // Rule
-  y += 3;
-  doc.setDrawColor(...ROT);
-  doc.setLineWidth(0.4);
-  doc.line(M, y, W - M, y);
-  y += 8;
+    let y = 34;
 
-  // Analyse sections
-  const sections = [
-    { label: 'DEIN LEBENSSINN · IKIGAI-KERN', text: analyseResult.kern, col: ROT, serif: true },
-    { label: 'PASSION & BERUFUNG', text: analyseResult.passion, col: BLAU, serif: false },
-    { label: 'EMPFEHLUNGEN', text: analyseResult.empfehlungen, col: BLAU, serif: false },
-    { label: 'NÄCHSTE SCHRITTE', text: analyseResult.schritte, col: BLAU, serif: false },
-    { label: 'DEIN PERSÖNLICHER SATZ', text: '„' + analyseResult.satz + '"', col: ROT, serif: true }
-  ];
+    const eingaben = [
+      { label: 'Was du liebst', col: ROT, items: data[1] },
+      { label: 'Was du gut kannst', col: BLAU, items: data[2] },
+      { label: 'Was die Welt braucht', col: [26, 92, 62], items: data[3] },
+      { label: 'Wofuer du bezahlt wirst', col: [138, 98, 8], items: data[4] }
+    ];
 
-  for (const s of sections) {
-    if (y > 265) { doc.addPage(); y = 20; }
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.5);
-    doc.setTextColor(...GRAU);
-    doc.setLetterSpacing(1.2);
-    doc.text(s.label, M, y);
-    doc.setLetterSpacing(0);
-    y += 5;
-    doc.setFont(s.serif ? 'times' : 'helvetica', s.serif ? 'italic' : 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(...DUNKEL);
-    const wrapped = doc.splitTextToSize(s.text, CW);
-    doc.text(wrapped, M, y);
-    y += wrapped.length * 5.5 + 7;
-  }
+    for (const e of eingaben) {
+      doc.setFillColor(...CREAM);
+      doc.rect(M, y, CW, 7, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(...e.col);
+      doc.text(e.label, M + 3, y + 5);
+      y += 9;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...DUNKEL);
+      const line = e.items.join('  |  ');
+      const wrapped = doc.splitTextToSize(line, CW - 6);
+      doc.text(wrapped, M + 3, y);
+      y += wrapped.length * 5 + 4;
+    }
 
-  // Footer
-  const pageCount = doc.internal.getNumberOfPages();
-  for (let p = 1; p <= pageCount; p++) {
-    doc.setPage(p);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    doc.setTextColor(...GRAU);
+    y += 4;
+    doc.setDrawColor(...ROT);
+    doc.setLineWidth(0.4);
+    doc.line(M, y, W - M, y);
+    y += 8;
+
+    const sections = [
+      { label: 'DEIN LEBENSSINN', text: analyseResult.kern, serif: true, col: ROT },
+      { label: 'PASSION & BERUFUNG', text: analyseResult.passion, serif: false, col: BLAU },
+      { label: 'EMPFEHLUNGEN', text: analyseResult.empfehlungen, serif: false, col: BLAU },
+      { label: 'NAECHSTE SCHRITTE', text: analyseResult.schritte, serif: false, col: BLAU },
+      { label: 'DEIN PERSOENLICHER SATZ', text: analyseResult.satz, serif: true, col: ROT }
+    ];
+
+    for (const s of sections) {
+      if (y > 265) { doc.addPage(); y = 20; }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(...GRAU);
+      doc.text(s.label, M, y);
+      y += 5;
+      doc.setFont(s.serif ? 'times' : 'helvetica', s.serif ? 'italic' : 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(...DUNKEL);
+      const wrapped = doc.splitTextToSize(s.text || '', CW);
+      doc.text(wrapped, M, y);
+      y += wrapped.length * 5.5 + 7;
+    }
+
     const today = new Date().toLocaleDateString('de-AT');
-    doc.text(`Erstellt am ${today}  ·  IKIGAI Kompass  ·  Erich Steinwendner  ·  steinwendner.info`, M, 289);
-  }
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...GRAU);
+    doc.text('Erstellt am ' + today + '  |  IKIGAI Kompass  |  steinwendner.info', M, 289);
 
-  doc.save('IKIGAI-Kompass-' + new Date().toISOString().slice(0,10) + '.pdf');
+    doc.save('IKIGAI-Kompass-' + new Date().toISOString().slice(0,10) + '.pdf');
+  } catch(e) {
+    alert('PDF konnte nicht erstellt werden: ' + e.message);
+  }
 }
 
 goScreen(0);
